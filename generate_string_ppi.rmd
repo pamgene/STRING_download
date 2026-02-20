@@ -1,0 +1,37 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+source("R/helper.R")
+
+species = '9606'
+# species_id = c(human = "9606", mouse = "10090", rat = "10116")[species]
+
+links = paste0("https://stringdb-downloads.org/download/protein.links.v12.0/", species, ".protein.links.v12.0.txt.gz")
+info = paste0("https://stringdb-downloads.org/download/protein.info.v12.0/", species, ".protein.info.v12.0.txt.gz")
+  
+names <- read_tsv(info) %>%
+    select(1:2)
+interactions <- read_delim(links, delim = " ")
+
+# run this only if high reliability needed
+full = "https://stringdb-downloads.org/download/protein.links.full.v12.0/9606.protein.links.full.v12.0.txt.gz"
+fullint <- read_delim(full, delim = " ")
+
+ppi_networkv12_filt <- generate_string_ppi(links, info, fullint, 
+                                           best_evidence = c('experiments', 'textmining', 'database'), 
+                                           transferred = F, genomic = F, to_kinograte = F )
+
+
+write_csv(ppi_networkv12_filt, "ppi_network_human_filtered_v12.csv")
+write_delim(ppi_networkv12_filt, "ppi_network_human_filtered_v12.txt", delim = "\t")
+save(ppi_networkv12_filt, file = "ppi_network_human_filtered_v12.rda")
+
+
+```
+
+
